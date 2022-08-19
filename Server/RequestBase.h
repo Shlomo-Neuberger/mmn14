@@ -13,16 +13,18 @@
 #define UNKNOW_REQUEST 0
 #include "Common.h"
 #include "Request.h"
+#include <sstream>
+#include <direct.h>
 
 
-namespace Request {
+namespace Requests {
 	
 	class RequestBase
 	{
 	public:
 		virtual int do_request() = 0; // TODO: make return response
 	};
-
+	int mkdirRecurse(std::string dir);
 
 	
 }

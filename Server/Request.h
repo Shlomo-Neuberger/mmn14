@@ -1,9 +1,9 @@
 #pragma once
 #include "Common.h"
 #include "RequestBase.h"
-namespace Request {
+namespace Requests {
 	 
-	typedef struct _RequestHeader {
+	typedef struct {
 		UINT32 uid =0;
 		UINT8 version=0;
 		UINT8 type = UNKNOW_REQUEST;

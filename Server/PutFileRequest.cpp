@@ -1,29 +1,17 @@
 #include "PutFileRequest.h"
 
-Request::PutFileRequest::PutFileRequest(const Request &request,SOCKET soc)
+Requests::PutFileRequest::PutFileRequest(const Request &request,SOCKET soc)
 {
 	_req = new Request(request);
 	_soc = soc;
 }
 
-UINT32 Request::PutFileRequest::getUID() noexcept
-{
-	return _req->header.uid;
-}
-
-UINT8 Request::PutFileRequest::getType() noexcept
-{
-	return _req->header.type;
-}
-
-Request::Request* Request::PutFileRequest::getRequest()
+Requests::Request* Requests::PutFileRequest::getRequest()
 {
 	return _req;
 }
-void appendWriteTofile(char* filename, char*buffer, size_t buffersize) {
-	std::cout << buffer << std::endl;
-}
-int Request::PutFileRequest::do_request()
+
+int Requests::PutFileRequest::do_request()
 {
 	int iResult = 0;
 	// get the filename size
@@ -69,17 +57,3 @@ int Request::PutFileRequest::do_request()
 	return 0;
 }
 
-int Request::mkdirRecurse(std::string dir) {
-	std::istringstream input(dir);
-	std::string temp;
-	std::string created("");
-	while (std::getline(input,temp,'\\')) {
-		created += temp+"\\";
-		if (_mkdir(created.c_str())!= -1 ) {
-			std::cout << errno <<"=?="<<ENOENT << std::endl;
-			if(errno  == ENOENT)
- 			return -1;
-		}
-	}
-	return 0;
-}

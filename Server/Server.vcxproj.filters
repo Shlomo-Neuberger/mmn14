@@ -39,6 +39,9 @@
     <ClCompile Include="Request.cpp">
       <Filter>Source Files\Requests</Filter>
     </ClCompile>
+    <ClCompile Include="RemoveFileRequest.cpp">
+      <Filter>Source Files\Requests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Server.h">
@@ -61,6 +64,9 @@
     </ClInclude>
     <ClInclude Include="Common.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RemoveFileRequest.h">
+      <Filter>Header Files\Requests</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
