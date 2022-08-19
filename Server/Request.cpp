@@ -1,58 +1,82 @@
 #include "Request.h"
 
-Request::Request::Request(const Request & old_obj)
+Requests::Request::Request(const Request & old_obj)
 {
-	memcpy(&header, &(old_obj.header), sizeof(RequestHeader));
-	header.filename = new char[old_obj.header.fileLen];
-	memcpy(header.filename, old_obj.header.filename, old_obj.header.fileLen);
-	memcpy(&body, &old_obj.body, sizeof(RequestBody));
+	memcpy(&_header, &(old_obj._header), sizeof(RequestHeader));
+	_header.filename = new char[old_obj._header.fileLen];
+	memcpy(_header.filename, old_obj._header.filename, old_obj._header.fileLen);
+	memcpy(&_body, &old_obj._body, sizeof(RequestBody));
 }
 
-Request::Request::Request(char * buffer, size_t buffsize)
+Requests::Request::Request(char * buffer, size_t buffsize)
 {
 	parseRequest(buffer, buffsize, this,PARSE_HEADER|PARSE_PAYLOAD_SIZE);
 }
 
-Request::Request::Request()
+Requests::Request::Request()
 {
 }
 
-int Request::Request::setCommonHeader(const char * buffer, UINT len)
+Requests::Request& Requests::Request::operator=(const Request& other)
+{
+	if (this == &other) {
+		return *this;
+	}
+	memcpy(&(this->_header), &(other._header), sizeof(RequestHeader));
+	this->_header.filename = new char[other._header.fileLen];
+	memcpy(this->_header.filename, other._header.filename, other._header.fileLen);
+	memcpy(&(this->_body), &other._body, sizeof(RequestBody));
+	return *this;
+}
+
+int Requests::Request::setCommonHeader(const char * buffer, UINT len)
 {
 	return parseRequestCommand(buffer, len, this);
 }
 
-int Request::Request::setFileLen(const char * buffer, UINT len)
+int Requests::Request::setFileLen(const char * buffer, UINT len)
 {
 	return parseRequestFileLen(buffer, len, this);
 }
 
 
-int Request::Request::setFileName(const char * buffer, UINT len)
+int Requests::Request::setFileName(const char * buffer, UINT len)
 {
 	return parseRequestFileName(buffer, len, this);
 }
 
-int Request::Request::setPayloadSize(const char* buffer, UINT len)
+int Requests::Request::setPayloadSize(const char* buffer, UINT len)
 {
 	return parseRequestPayloadSize(buffer, len, this);
 }
 
-Request::Request::~Request()
+const Requests::RequestHeader& Requests::Request::getHeader()
 {
-	if(this->header.filename != nullptr)
-		delete this->header.filename;
-	if (this->body.payload != nullptr)
-		delete this->body.payload;
+	// TODO: insert return statement here
+	return this->_header;
+}
+
+const Requests::RequestBody& Requests::Request::getBody()
+{
+	// TODO: insert return statement here
+	return this->_body;
+}
+
+Requests::Request::~Request()
+{
+	if(this->_header.filename != nullptr)
+		delete this->_header.filename;
+	if (this->_body.payload != nullptr)
+		delete this->_body.payload;
 }
 
 
 
-int Request::Request::parseRequest(const char * buffer, UINT len, Request * request, byte parseFlags)
+int Requests::Request::parseRequest(const char * buffer, UINT len, Request * request, byte parseFlags)
 {
-	size_t commandSize = sizeof(request->header.uid) + sizeof(request->header.version) + sizeof(request->header.type);
-	size_t nameLenSize = sizeof(request->header.fileLen);
-	size_t payloadLensize = sizeof(request->body.fileSize);
+	size_t commandSize = sizeof(request->_header.uid) + sizeof(request->_header.version) + sizeof(request->_header.type);
+	size_t nameLenSize = sizeof(request->_header.fileLen);
+	size_t payloadLensize = sizeof(request->_body.fileSize);
 	int iResult = 0;
 	if (!request || request == nullptr) {
 		return -1;
@@ -63,11 +87,11 @@ int Request::Request::parseRequest(const char * buffer, UINT len, Request * requ
 		len -= commandSize;
 		if (len >= nameLenSize && iResult == 0) iResult = parseRequestFileLen(buffer, len, request);
 		len -= nameLenSize;
-		if(len >= request->header.fileLen && iResult == 0) iResult = parseRequestFileName(buffer,len,request);
-		len -= request->header.fileLen;
+		if(len >= request->_header.fileLen && iResult == 0) iResult = parseRequestFileName(buffer,len,request);
+		len -= request->_header.fileLen;
 		if(len >= payloadLensize && iResult == 0) iResult = parseRequestPayloadSize(buffer + sizeof(RequestHeader), len - sizeof(RequestHeader), request);
 		len -= payloadLensize;
-		if(len >= request->body.fileSize && iResult == 0) iResult = parseRequestPayload(buffer + sizeof(RequestHeader) + sizeof(UINT), len - sizeof(RequestHeader), request);
+		if(len >= request->_body.fileSize && iResult == 0) iResult = parseRequestPayload(buffer + sizeof(RequestHeader) + sizeof(UINT), len - sizeof(RequestHeader), request);
 		return  iResult;
 	}
 	if ((parseFlags & PARSE_HEADER) > 0) {
@@ -82,40 +106,51 @@ int Request::Request::parseRequest(const char * buffer, UINT len, Request * requ
 
 	return 0;
 }
-int Request::Request::parseRequestFileLen(const char * buffer, UINT len, Request * request)
+int Requests::Request::parseRequestFileLen(const char * buffer, UINT len, Request * request)
 {
-	size_t payloadSize = sizeof(request->header.fileLen);
+	size_t payloadSize = sizeof(request->_header.fileLen);
 	if (len < payloadSize) {
 		return -1;
 	}
-	memcpy(&(request->header.fileLen), buffer, payloadSize);
-	request->header.fileLen = _byteswap_ushort(request->header.fileLen);
+	memcpy(&(request->_header.fileLen), buffer, payloadSize);
+	request->_header.fileLen = _byteswap_ushort(request->_header.fileLen);
 	return 0;
 }
-int Request::Request::parseRequestCommand(const char * buffer, UINT len, Request * request)
+int Requests::Request::parseRequestCommand(const char * buffer, UINT len, Request * request)
 {
-	size_t payloadSize = sizeof(request->header.uid)+ sizeof(request->header.version)+ sizeof(request->header.type);
+	size_t payloadSize = sizeof(request->_header.uid)+ sizeof(request->_header.version)+ sizeof(request->_header.type);
 	if (len < payloadSize) {
 		return -1;
 	}
-	memcpy(&request->header, buffer, payloadSize);
-	request->header.uid = _byteswap_ulong(request->header.uid);
+	memcpy(&request->_header, buffer, payloadSize);
+	request->_header.uid = _byteswap_ulong(request->_header.uid);
 	return 0;
 }
-int Request::Request::parseRequestFileName(const char * buffer, UINT len, Request * request)
+int Requests::Request::parseRequestFileName(const char * buffer, UINT len, Request * request)
 {
-	request->header.filename = new char[min(UINT16_MAX - 1, request->header.fileLen + 1)];
-	memcpy(request->header.filename, buffer, request->header.fileLen);
-	request->header.filename[request->header.fileLen] = 0;
+	size_t fileNameSize = min(UINT16_MAX - 1, request->_header.fileLen + 1);
+	if (len < fileNameSize-1) {
+		return -1;
+	}
+	request->_header.filename = new char[fileNameSize];
+	memcpy(request->_header.filename, buffer, fileNameSize);
+	request->_header.filename[fileNameSize] = 0;
 	return 0;
 }
-int Request::Request::parseRequestPayloadSize(const char * buffer, UINT len, Request * request)
+int Requests::Request::parseRequestPayloadSize(const char * buffer, UINT len, Request * request)
 {
-	memcpy(&(request->body.fileSize), buffer, sizeof(request->body.fileSize));
-	request->body.fileSize = _byteswap_ulong(request->body.fileSize);
+	size_t fileSizeDataSize = sizeof(request->_body.fileSize);
+	if (len < fileSizeDataSize) {
+		return -1;
+	}
+	memcpy(&(request->_body.fileSize), buffer, fileSizeDataSize);
+	request->_body.fileSize = _byteswap_ulong(request->_body.fileSize);
 	return 0;
 }
-int Request::Request::parseRequestPayload(const char * buffer, UINT len, Request * request)
+int Requests::Request::parseRequestPayload(const char * buffer, UINT len, Request * request)
 {
+	UNREFERENCED_PARAMETER(buffer);
+	UNREFERENCED_PARAMETER(len);
+	UNREFERENCED_PARAMETER(request);
 	return 0;
 }

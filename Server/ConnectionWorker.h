@@ -4,6 +4,7 @@
 #include "Common.h"
 #include "RequestBase.h"
 #include "PutFileRequest.h"
+#include "RemoveFileRequest.h"
 enum WorkerState
 {
 	IDLE,
