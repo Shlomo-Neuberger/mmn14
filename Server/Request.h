@@ -1,0 +1,42 @@
+#pragma once
+#include "Common.h"
+#include "RequestBase.h"
+namespace Request {
+	 
+	typedef struct _RequestHeader {
+		UINT32 uid =0;
+		UINT8 version=0;
+		UINT8 type = UNKNOW_REQUEST;
+		UINT16 fileLen = 0;
+		char* filename=nullptr;
+	}RequestHeader, *PRequestHeader;
+	typedef struct {
+		UINT32 fileSize = 0;
+		byte* payload = nullptr;
+	} RequestBody, *PRequestBody;
+
+	class Request {
+	private:
+		int parseRequest(const char* buffer, UINT len, Request* request, byte flags = PARSE_ALL);
+		int parseRequestCommand(const char* buffer, UINT len, Request* request);;
+		int parseRequestFileLen(const char* buffer, UINT len, Request* request);
+		int parseRequestFileName(const char* buffer, UINT len, Request* request);
+		int parseRequestPayloadSize(const char* buffer, UINT len, Request* request);
+		int parseRequestPayload(const char* buffer, UINT len, Request* request);
+	public:
+		RequestHeader header;
+		RequestBody body;
+		/*
+		* Notice payload won't be deep copy by desing
+		*/
+		Request(const Request &old_obj);
+		Request(char* buffer,size_t buffsize);
+		Request();
+		int setCommonHeader(const char* buffer, UINT len);
+		int setFileLen(const char* buffer, UINT len);
+		int setFileName(const char* buffer, UINT len);
+		int setPayloadSize(const char* buffer, UINT len);
+		virtual ~Request();
+	};
+
+}
