@@ -14,17 +14,18 @@
 #include "Request.h"
 #include <sstream>
 #include <direct.h>
+#include <sstream>
+#include <direct.h>
 
+namespace Requests
+{
 
-namespace Requests {
-	
 	class RequestBase
 	{
 	public:
 		virtual int do_request() = 0; // TODO: make return response
 	};
-	
+
 	int mkdirRecurse(std::string dir);
 
-	
 }
