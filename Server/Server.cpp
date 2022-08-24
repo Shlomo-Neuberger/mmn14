@@ -1,16 +1,18 @@
-#include"Server.h"
+#include "Server.h"
 
 int Server::initWinsock()
-{	WSAData _wsaData;
+{
+	WSAData _wsaData;
 	int iResult = WSAStartup(MAKEWORD(2, 2), &_wsaData);
-	if (iResult != 0) {
+	if (iResult != 0)
+	{
 		// Some error occurd
 		return iResult;
 	}
 	return 0;
 }
 
-int Server::initAddressInfo(addrinfo** result)
+int Server::initAddressInfo(addrinfo **result)
 {
 	addrinfo hint;
 	ZeroMemory(&hint, sizeof(hint));
@@ -19,20 +21,22 @@ int Server::initAddressInfo(addrinfo** result)
 	hint.ai_protocol = IPPROTO_TCP;
 	hint.ai_flags = AI_PASSIVE;
 	int iResult = getaddrinfo(NULL, _port.c_str(), &hint, result);
-	if (iResult != 0) {
+	if (iResult != 0)
+	{
 		WSACleanup();
 		return iResult;
 	}
 	return 0;
 }
 
-SOCKET Server::createSocket(addrinfo * addcresInfo)
+SOCKET Server::createSocket(addrinfo *addcresInfo)
 {
 	SOCKET result = socket(
 		addcresInfo->ai_family,
 		addcresInfo->ai_socktype,
 		addcresInfo->ai_protocol);
-	if (result == INVALID_SOCKET) {
+	if (result == INVALID_SOCKET)
+	{
 		freeaddrinfo(addcresInfo);
 		WSACleanup();
 	}
@@ -42,23 +46,27 @@ SOCKET Server::createSocket(addrinfo * addcresInfo)
 
 void Server::workerCleaner()
 {
-	ConnectionWorker* worker = nullptr;
+	ConnectionWorker *worker = nullptr;
 	_running = true;
-	while (_running) {
-		
-		lock.lock(); 
-		if (_workers.size() == 0) {
+	while (_running)
+	{
+
+		lock.lock();
+		if (_workers.size() == 0)
+		{
 			lock.unlock();
 			Sleep(1000);
 			continue;
 		}
 		auto it_workers = _workers.begin();
 		lock.unlock();
-		do {
+		do
+		{
 			lock.lock();
 			worker = *(it_workers);
 			lock.unlock();
-			if (worker->getState() == DONE) {
+			if (worker->getState() == DONE)
+			{
 				worker->join();
 				delete worker;
 				auto _it_workers = it_workers;
@@ -69,7 +77,8 @@ void Server::workerCleaner()
 				if (it_workers == _workers.end())
 					break;
 			}
-			else if(worker->getStartTime() < time(0) + TIMEOUT) {
+			else if (worker->getStartTime() < time(0) + TIMEOUT)
+			{
 				worker->abort();
 			}
 			lock.lock();
@@ -81,11 +90,11 @@ void Server::workerCleaner()
 		} while (worker != nullptr);
 		worker = nullptr;
 	}
-
 }
 
-void Server::intiateWorker(SOCKET soc) {
-	ConnectionWorker* worker = new ConnectionWorker(soc);
+void Server::intiateWorker(SOCKET soc)
+{
+	ConnectionWorker *worker = new ConnectionWorker(soc);
 	worker->start();
 	lock.lock();
 	_workers.push_back(worker);
@@ -98,48 +107,56 @@ Server::Server(std::string port)
 	_running = false;
 	_cleaner_thread = nullptr;
 }
-int Server::init() {
-	
+int Server::init()
+{
+
 	int result = initWinsock();
-	if (result != 0) {
+	if (result != 0)
+	{
 		return result;
 	}
 	result = initAddressInfo(&_addresInfo);
-	if (result != 0) {
+	if (result != 0)
+	{
 		return result;
-
 	}
 	_sock = createSocket(_addresInfo);
-	if (result != 0) {
+	if (result != 0)
+	{
 		return result;
-
 	}
 	int iResult = bind(_sock, _addresInfo->ai_addr, (int)_addresInfo->ai_addrlen);
-	if (iResult == SOCKET_ERROR) {
+	if (iResult == SOCKET_ERROR)
+	{
 		return -1;
 	}
 	iResult = listen(_sock, SOMAXCONN);
-	if (iResult == SOCKET_ERROR) {
+	if (iResult == SOCKET_ERROR)
+	{
 		return -1;
 	}
 	_cleaner_thread = new std::thread(&Server::workerCleaner, this);
 	return 0;
-
 }
 
-int Server::nextSocket(SOCKET* soc) {
+int Server::nextSocket(SOCKET *soc)
+{
 	*soc = INVALID_SOCKET;
 	*soc = accept(_sock, NULL, NULL);
-	if (*soc == INVALID_SOCKET) return -1;
+	if (*soc == INVALID_SOCKET)
+		return -1;
 	return 0;
 }
 
-Server::~Server() {
+Server::~Server()
+{
 	_running = false;
 	_cleaner_thread->join();
 	freeaddrinfo(_addresInfo);
+	closesocket(_sock);
 	WSACleanup();
-	for (auto worker : _workers) {
+	for (auto worker : _workers)
+	{
 		worker->join();
 		delete worker;
 	}
