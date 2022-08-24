@@ -20,7 +20,7 @@ int Requests::RemoveFileRequest::do_request()
 	iResult = _req->setFileLen(buffer, recived);
 	delete[] buffer;
 	if (iResult < 0) {
-		iResult = NO_CONTENTS;
+		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
@@ -32,7 +32,7 @@ int Requests::RemoveFileRequest::do_request()
 	iResult = _req->setFileName(buffer, recived);
 	delete[] buffer;
 	if (iResult < 0) {
-		iResult = NO_CONTENTS;
+		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
@@ -43,7 +43,7 @@ int Requests::RemoveFileRequest::do_request()
 	outfile.open(filePath, std::ios::binary | std::ios::trunc | std::ios::in);
 	if (!outfile.is_open())
 	{
-		iResult = NO_CONTENTS;
+		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_FILE_NOT_FOUND;
 		header.version = VERSION;
 		goto end;
@@ -51,17 +51,17 @@ int Requests::RemoveFileRequest::do_request()
 	outfile.close();
 	iResult = remove(filePath.c_str());
 	if (iResult < 0) {
-		iResult = NO_CONTENTS;
+		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
 	}
-	iResult = NO_PAYLOAD;
+	iResult = RESPONSE_SENDER_NO_PAYLOAD;
 	header.status = STATUS_SEUCCESS_FOUND_FILE;
 	header.version = VERSION;
 	header.fileLen = _req->getHeader().fileLen;
 	header.filename = _req->getHeader().filename;
  end:
 	Responses::sendResponse(_soc, &header, &body, iResult);
-	return NO_PAYLOAD == iResult ? 0 : iResult; // A correct return value is NO_PAYLOAD so we rturn 0
+	return RESPONSE_SENDER_NO_PAYLOAD == iResult ? 0 : iResult; // A correct return value is NO_PAYLOAD so we rturn 0
 }

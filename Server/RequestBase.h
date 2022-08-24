@@ -14,10 +14,20 @@ namespace Requests
 	class RequestBase
 	{
 	public:
-		virtual int do_request() = 0; // TODO: make return response
+		/**
+		 * @brief Handles the request
+		 *
+		 * @return int non-negtaive result for OK
+		 */
+		virtual int do_request() = 0;
 		virtual ~RequestBase();
 	};
-
+	/**
+	 * @brief Creates a directory to recursavly
+	 *
+	 * @param dir the result wanted
+	 * @return int non negative if ok
+	 */
 	int mkdirRecurse(std::string dir);
 
 }

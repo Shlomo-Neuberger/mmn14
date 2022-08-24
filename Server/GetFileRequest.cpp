@@ -38,7 +38,7 @@ int Requests::GetFileRequest::do_request()
 	std::ifstream ifile(lsPath,std::ios::binary);
 	if (!ifile.is_open())
 	{
-		iResult = NO_PAYLOAD;
+		iResult = RESPONSE_SENDER_NO_PAYLOAD;
 		header.status = STATUS_FAIL_FILE_NOT_FOUND;
 		header.version = VERSION;
 		header.fileLen = _req->getHeader().fileLen;
@@ -53,7 +53,7 @@ int Requests::GetFileRequest::do_request()
 	fileSize = pbuf->pubseekoff(0, ifile.end, ifile.in);
 	pbuf->pubseekpos(0, ifile.in);
 	if (fileSize > UINT32_MAX) {
-		iResult = NO_CONTENTS;
+		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
@@ -65,7 +65,7 @@ int Requests::GetFileRequest::do_request()
 	pbuf->sgetn(fileData, fileSize);
 
 	ifile.close();
-	iResult = FULL_RESPONSE;
+	iResult = RESPONSE_SENDER_FULL_RESPONSE;
 	header.version = VERSION;
 	header.status = STATUS_SEUCCESS_LIST_CREATED;
 	header.fileLen = _req->getHeader().fileLen;

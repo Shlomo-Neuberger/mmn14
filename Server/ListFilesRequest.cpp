@@ -22,22 +22,22 @@ int Requests::ListFilesRequest::do_request()
 	static const char alphanum[] =
 		"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	body.fileSize = 0;
-	if (_req->getHeader().type != LIST_FILES) {
-		iResult = NO_CONTENTS;
+	if (_req->getHeader().type != REQUEST_OP_LIST_FILES) {
+		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
 	}
 	lsPath += std::to_string(_req->getHeader().uid)+"\\*";
 	if (strlen(lsPath.c_str()) > MAX_PATH) {
-		iResult = NO_CONTENTS;
+		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
 	}
 	hFind = FindFirstFileA(lsPath.c_str(), &data);
 	srand((UINT)time(0));
-	for (int i = 0; i < FILE_NAME_SIZE; i++) {
+	for (int i = 0; i < CREATE_LIST_FILE_NAME_SIZE; i++) {
 		filename += alphanum[rand() % (sizeof(alphanum) - 1)];
 	}
 	if (hFind != INVALID_HANDLE_VALUE) {
@@ -47,7 +47,7 @@ int Requests::ListFilesRequest::do_request()
 			UINT64 nextSize = ((UINT64)body.fileSize) + _tmp.length();
 			if (nextSize > UINT32_MAX)
 			{ //Protect file size overflow
-				iResult = NO_CONTENTS;
+				iResult = RESPONSE_SENDER_NO_CONTENTS;
 				header.status = STATUS_FAIL_SERVER_ERROR;
 				header.version = VERSION;
 				goto end;
@@ -59,7 +59,7 @@ int Requests::ListFilesRequest::do_request()
 	}
 	
 	if (fileData.size() == 0 || hFind != INVALID_HANDLE_VALUE) {
-		iResult = NO_CONTENTS;
+		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_NO_FILES;
 		header.version = VERSION;
 		goto end;
@@ -67,9 +67,9 @@ int Requests::ListFilesRequest::do_request()
 
 	header.version = VERSION;
 	header.status = STATUS_SEUCCESS_LIST_CREATED;
-	header.fileLen = FILE_NAME_SIZE;
+	header.fileLen = CREATE_LIST_FILE_NAME_SIZE;
 	header.filename = new char[header.fileLen];
-	memcpy(header.filename, filename.c_str(), FILE_NAME_SIZE);
+	memcpy(header.filename, filename.c_str(), CREATE_LIST_FILE_NAME_SIZE);
 	body.fileSize += fileData.size();
 	body.payload = new byte[body.fileSize];
 	skips = 0;
@@ -79,7 +79,7 @@ int Requests::ListFilesRequest::do_request()
 		skips += tmpFilename.length();
 		body.payload[skips] = (byte)'\n';
 	}
-	iResult = FULL_RESPONSE;
+	iResult = RESPONSE_SENDER_FULL_RESPONSE;
 end:
 	Responses::sendResponse(_soc, &header, &body, iResult);
 	if(body.payload!= nullptr) delete[] body.payload;

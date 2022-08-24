@@ -2,18 +2,30 @@
 #include "Common.h"
 #include "RequestBase.h"
 #include <fstream>
-namespace Requests {
-	class RemoveFileRequest :
-		public RequestBase
+namespace Requests
+{
+	class RemoveFileRequest : public RequestBase
 	{
 	private:
-		Request* _req;
+		// The request passed to handle
+		Request *_req;
+		// The socket to read and send data
 		SOCKET _soc;
-	public:
-	public:
-		RemoveFileRequest(const Request &request, SOCKET soc);
-		int do_request(); // TODO: make return response
 
+	public:
+	public:
+		/**
+		 * @brief Get the File Request object
+		 *
+		 * @param request The request passed to handle
+		 * @param soc The socket to read and send data
+		 */
+		RemoveFileRequest(const Request &request, SOCKET soc);
+		/**
+		 * @brief Handles the request
+		 *
+		 * @return int non-negtaive result for OK
+		 */
+		int do_request();
 	};
 }
-

@@ -5,16 +5,28 @@
 #include <fstream>
 namespace Requests
 {
-	class GetFileRequest :public RequestBase
+	class GetFileRequest : public RequestBase
 	{
 	private:
-		Request* _req;
+		// The request passed to handle
+		Request *_req;
+		// The socket to read and send data
 		SOCKET _soc;
 
 	public:
-		GetFileRequest(const Request& request, SOCKET soc);
-		int do_request(); // TODO: make return response
+		/**
+		 * @brief Get the File Request object
+		 *
+		 * @param request The request passed to handle
+		 * @param soc The socket to read and send data
+		 */
+		GetFileRequest(const Request &request, SOCKET soc);
+		/**
+		 * @brief Handles the request
+		 *
+		 * @return int non-negtaive result for OK
+		 */
+		int do_request();
 	};
 
 }
-

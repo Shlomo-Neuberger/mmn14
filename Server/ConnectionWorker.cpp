@@ -27,19 +27,19 @@ void ConnectionWorker::run()
 
 	switch (req._header.type)
 	{
-	case PUT_FILE:
+	case REQUEST_OP_PUT_FILE:
 		request = new Requests::PutFileRequest(req, _soc);
 		break;
-	case REMOVE_FILE:
+	case REQUEST_OP_REMOVE_FILE:
 		request = new Requests::RemoveFileRequest(req, _soc);
 		break;
-	case GET_FILE:
+	case REQUEST_OP_GET_FILE:
 		request = new Requests::GetFileRequest(req, _soc);
 		break;
-	case LIST_FILES:
+	case REQUEST_OP_LIST_FILES:
 		request = new Requests::ListFilesRequest(req, _soc);
 		break;
-	case UNKNOW_REQUEST:
+	case REQUEST_OP_UNKNOW_REQUEST:
 	default:
 		break;
 	}

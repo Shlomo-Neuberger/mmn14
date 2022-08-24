@@ -17,7 +17,7 @@ int Responses::sendResponse(const SOCKET soc,const PResponseHeader header, const
 		sent += send(soc, buffer, bufSize, 0);
 		delete[] buffer;
 	}
-	if (flag == NO_CONTENTS) {
+	if (flag == RESPONSE_SENDER_NO_CONTENTS) {
 		return sent;
 	}
 	{
@@ -34,7 +34,7 @@ int Responses::sendResponse(const SOCKET soc,const PResponseHeader header, const
 	memcpy(buffer, header->filename, bufSize);
 	sent += send(soc, buffer, bufSize, 0);
 	delete[] buffer;
-	if (flag == NO_PAYLOAD) {
+	if (flag == RESPONSE_SENDER_NO_PAYLOAD) {
 		return sent;
 	}
 	{

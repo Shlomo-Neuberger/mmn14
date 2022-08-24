@@ -29,7 +29,7 @@ int Requests::PutFileRequest::do_request()
 	iResult = _req->setFileName(buffer, recived);
 	delete[] buffer;
 	if (iResult < 0) {
-		iResult = NO_CONTENTS;
+		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
@@ -42,7 +42,7 @@ int Requests::PutFileRequest::do_request()
 	iResult = _req->setPayloadSize(buffer, recived);
 	delete[] buffer;
 	if (iResult < 0) {
-		iResult = NO_CONTENTS;
+		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
@@ -56,7 +56,7 @@ int Requests::PutFileRequest::do_request()
 	filePath = basepath + "\\" + _req->_header.filename;
 	if (mkdirRecurse(basepath) != 0)
 	{
-		iResult = NO_CONTENTS;
+		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
@@ -66,7 +66,7 @@ int Requests::PutFileRequest::do_request()
 	outfile.open(filePath, std::ios::binary | std::ios::app | std::ios::out);
 	if (!outfile.is_open())
 	{
-		iResult = NO_CONTENTS;
+		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
@@ -80,7 +80,7 @@ int Requests::PutFileRequest::do_request()
 	} while (fileSize > 0);
 	outfile.close();
 	delete[] buffer;
-	iResult = FULL_RESPONSE;
+	iResult = RESPONSE_SENDER_FULL_RESPONSE;
 	header.status = STATUS_SEUCCESS_FOUND_FILE;
 	header.version = VERSION;
 	header.fileLen = _req->getHeader().fileLen;

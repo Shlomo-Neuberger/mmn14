@@ -8,12 +8,25 @@ namespace Requests
 	class PutFileRequest : public RequestBase
 	{
 	private:
+		// The request passed to handle
 		Request *_req;
+		// The socket to read and send data
 		SOCKET _soc;
 
 	public:
+		/**
+		 * @brief Get the File Request object
+		 *
+		 * @param request The request passed to handle
+		 * @param soc The socket to read and send data
+		 */
 		PutFileRequest(const Request &request, SOCKET soc);
-		int do_request(); // TODO: make return response
+		/**
+		 * @brief Handles the request
+		 *
+		 * @return int non-negtaive result for OK
+		 */
+		int do_request();
 	};
 
 }
