@@ -19,6 +19,12 @@
     <Filter Include="Source Files\Requests">
       <UniqueIdentifier>{984b4888-1c2f-475d-88f1-e6ff3438bbc1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Response">
+      <UniqueIdentifier>{b4c00480-7e82-4e0f-850f-ce7e1377e052}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Response">
+      <UniqueIdentifier>{8451ac80-bec8-4fc7-89d3-5d168c35d222}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">
@@ -40,6 +46,15 @@
       <Filter>Source Files\Requests</Filter>
     </ClCompile>
     <ClCompile Include="RemoveFileRequest.cpp">
+      <Filter>Source Files\Requests</Filter>
+    </ClCompile>
+    <ClCompile Include="ListFilesRequest.cpp">
+      <Filter>Source Files\Requests</Filter>
+    </ClCompile>
+    <ClCompile Include="Response.cpp">
+      <Filter>Source Files\Response</Filter>
+    </ClCompile>
+    <ClCompile Include="GetFileRequest.cpp">
       <Filter>Source Files\Requests</Filter>
     </ClCompile>
   </ItemGroup>
@@ -66,6 +81,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RemoveFileRequest.h">
+      <Filter>Header Files\Requests</Filter>
+    </ClInclude>
+    <ClInclude Include="ListFilesRequest.h">
+      <Filter>Header Files\Requests</Filter>
+    </ClInclude>
+    <ClInclude Include="Response.h">
+      <Filter>Header Files\Response</Filter>
+    </ClInclude>
+    <ClInclude Include="GetFileRequest.h">
       <Filter>Header Files\Requests</Filter>
     </ClInclude>
   </ItemGroup>

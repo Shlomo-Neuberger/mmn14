@@ -10,10 +10,10 @@ Requests::Request::Request(const Request &old_obj)
 
 Requests::Request::Request(char *buffer, size_t buffsize)
 {
-	parseRequest(buffer, buffsize, this, PARSE_HEADER | PARSE_PAYLOAD_SIZE);
+	parseRequest(buffer, buffsize, this, REQUEST_PARSER_PARSE_HEADER | REQUEST_PARSER_PARSE_PAYLOAD_SIZE);
 }
 
-Requestss::Request::Request()
+Requests::Request::Request()
 {
 }
 
@@ -81,7 +81,7 @@ int Requests::Request::parseRequest(const char *buffer, UINT len, Request *reque
 		return -1;
 	}
 
-	if (parseFlags == PARSE_ALL)
+	if (parseFlags == REQUEST_PARSER_PARSE_ALL)
 	{
 		if (len >= commandSize && iResult == 0)
 			iResult = parseRequestCommand(buffer, len, request);
@@ -99,15 +99,15 @@ int Requests::Request::parseRequest(const char *buffer, UINT len, Request *reque
 			iResult = parseRequestPayload(buffer + sizeof(RequestHeader) + sizeof(UINT), len - sizeof(RequestHeader), request);
 		return iResult;
 	}
-	if ((parseFlags & PARSE_HEADER) > 0)
+	if ((parseFlags & REQUEST_PARSER_PARSE_HEADER) > 0)
 	{
 		parseRequestFileLen(buffer, len, request);
 	}
-	if ((parseFlags & PARSE_PAYLOAD_SIZE) > 0)
+	if ((parseFlags & REQUEST_PARSER_PARSE_PAYLOAD_SIZE) > 0)
 	{
 		parseRequestPayloadSize(buffer, len, request);
 	}
-	if ((parseFlags & PARSE_PAYLOAD_DATA) > 0)
+	if ((parseFlags & REQUEST_PARSER_PARSE_PAYLOAD_DATA) > 0)
 	{
 		parseRequestPayload(buffer, len, request);
 	}
@@ -143,7 +143,7 @@ int Requests::Request::parseRequestFileName(const char *buffer, UINT len, Reques
 	{
 		return -1;
 	}
-	request->_header.filename = new char[fileNameSize];
+	request->_header.filename = new char[fileNameSize+1];
 	memcpy(request->_header.filename, buffer, fileNameSize);
 	request->_header.filename[fileNameSize] = 0;
 	return 0;

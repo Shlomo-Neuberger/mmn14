@@ -3,10 +3,10 @@
 #include "RequestBase.h"
 namespace Requests {
 	 
-	typedef struct {
+	typedef struct _RequestHeader {
 		UINT32 uid =0;
 		UINT8 version=0;
-		UINT8 type = UNKNOW_REQUEST;
+		UINT8 type = REQUEST_OP_UNKNOW_REQUEST;
 		UINT16 fileLen = 0;
 		char* filename=nullptr;
 	}RequestHeader, *PRequestHeader;
@@ -14,10 +14,9 @@ namespace Requests {
 		UINT32 fileSize = 0;
 		byte* payload = nullptr;
 	} RequestBody, *PRequestBody;
-
 	class Request {
 	private:
-		int parseRequest(const char* buffer, UINT len, Request* request, byte flags = PARSE_ALL);
+		int parseRequest(const char* buffer, UINT len, Request* request, byte flags = REQUEST_PARSER_PARSE_ALL);
 		int parseRequestCommand(const char* buffer, UINT len, Request* request);;
 		int parseRequestFileLen(const char* buffer, UINT len, Request* request);
 		int parseRequestFileName(const char* buffer, UINT len, Request* request);

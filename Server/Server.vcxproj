@@ -153,9 +153,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ConnectionWorker.cpp" />
+    <ClCompile Include="GetFileRequest.cpp" />
+    <ClCompile Include="ListFilesRequest.cpp" />
     <ClCompile Include="PutFileRequest.cpp" />
     <ClCompile Include="RemoveFileRequest.cpp" />
     <ClCompile Include="Request.cpp" />
+    <ClCompile Include="Response.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RequestBase.cpp" />
@@ -163,10 +166,13 @@
   <ItemGroup>
     <ClInclude Include="ConnectionWorker.h" />
     <ClInclude Include="Common.h" />
+    <ClInclude Include="GetFileRequest.h" />
+    <ClInclude Include="ListFilesRequest.h" />
     <ClInclude Include="PutFileRequest.h" />
     <ClInclude Include="RemoveFileRequest.h" />
     <ClInclude Include="Request.h" />
     <ClInclude Include="RequestBase.h" />
+    <ClInclude Include="Response.h" />
     <ClInclude Include="WinSockImports.h" />
     <ClInclude Include="Server.h" />
   </ItemGroup>

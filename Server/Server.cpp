@@ -49,6 +49,7 @@ void Server::workerCleaner()
 		lock.lock(); 
 		if (_workers.size() == 0) {
 			lock.unlock();
+			Sleep(1000);
 			continue;
 		}
 		auto it_workers = _workers.begin();
@@ -67,6 +68,9 @@ void Server::workerCleaner()
 				lock.unlock();
 				if (it_workers == _workers.end())
 					break;
+			}
+			else if(worker->getStartTime() < time(0) + TIMEOUT) {
+				worker->abort();
 			}
 			lock.lock();
 			if (std::next(it_workers) != _workers.end())

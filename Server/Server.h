@@ -6,7 +6,6 @@
 #include"WinSockImports.h"
 #include "Common.h"
 #include "ConnectionWorker.h"
-#define DEFUALT_PORT "8080"
 class Server
 {
 private:

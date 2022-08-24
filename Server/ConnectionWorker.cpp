@@ -12,14 +12,18 @@ ConnectionWorker::ConnectionWorker()
 	_thread = nullptr;
 }
 
-void ConnectionWorker::run() {
-	//recv only header first
+time_t ConnectionWorker::getStartTime() { return startTime; }
+
+void ConnectionWorker::run()
+{
+	// recv only header first
 	_state = WORKING;
+	startTime = time(0);
 	ZeroMemory(_recvbuf, DEFUALT_BUFFER_LEN);
-	int len = recv(_soc, _recvbuf, sizeof(Requests::RequestHeader)-sizeof(char*)-sizeof(UINT16) , 0);
+	int len = recv(_soc, _recvbuf, sizeof(Requests::RequestHeader) - sizeof(char *) - sizeof(UINT16), 0);
 	Requests::Request req;
 	req.setCommonHeader(_recvbuf, len);
-	Requests::RequestBase* request = nullptr;
+	Requests::RequestBase *request = nullptr;
 
 	switch (req._header.type)
 	{
@@ -30,21 +34,27 @@ void ConnectionWorker::run() {
 		request = new Requests::RemoveFileRequest(req, _soc);
 		break;
 	case GET_FILE:
+		request = new Requests::GetFileRequest(req, _soc);
 		break;
-	case DESCRIBE_FILES:
-
+	case LIST_FILES:
+		request = new Requests::ListFilesRequest(req, _soc);
 		break;
 	case UNKNOW_REQUEST:
 	default:
 		break;
 	}
+
 	if (request != nullptr)
+	{
 		request->do_request();
+		delete request;
+	}
 	closesocket(_soc);
 	_state = DONE;
 }
 
-int ConnectionWorker::join() {
+int ConnectionWorker::join()
+{
 	_thread->join();
 	delete _thread;
 	_thread = nullptr;
@@ -55,7 +65,11 @@ int ConnectionWorker::join() {
 void ConnectionWorker::start()
 {
 	_thread = new std::thread(&ConnectionWorker::run, this);
-	
+}
+
+void ConnectionWorker::abort()
+{
+	_thread->~thread();
 }
 
 WorkerState ConnectionWorker::getState()

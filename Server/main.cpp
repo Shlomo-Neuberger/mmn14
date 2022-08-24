@@ -15,6 +15,5 @@ int main()
 		server.nextSocket(&sock);
 		server.intiateWorker(sock);
 	} while (true);
-	std::cout << "NOP";
 }
 
