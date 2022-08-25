@@ -1,12 +1,10 @@
 #include "ListFilesRequest.h"
 
-Requests::ListFilesRequest::ListFilesRequest(const Request& request, SOCKET soc)
+Requests::ListFilesRequest::ListFilesRequest(const Request &request, SOCKET soc)
 {
 	_req = new Request(request);
 	_soc = soc;
 }
-
-
 
 int Requests::ListFilesRequest::do_request()
 {
@@ -22,14 +20,16 @@ int Requests::ListFilesRequest::do_request()
 	static const char alphanum[] =
 		"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	body.fileSize = 0;
-	if (_req->getHeader().type != REQUEST_OP_LIST_FILES) {
+	if (_req->getHeader().type != REQUEST_OP_LIST_FILES)
+	{
 		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
 	}
-	lsPath += std::to_string(_req->getHeader().uid)+"\\*";
-	if (strlen(lsPath.c_str()) > MAX_PATH) {
+	lsPath += std::to_string(_req->getHeader().uid) + "\\*";
+	if (strlen(lsPath.c_str()) > MAX_PATH)
+	{
 		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
@@ -37,16 +37,20 @@ int Requests::ListFilesRequest::do_request()
 	}
 	hFind = FindFirstFileA(lsPath.c_str(), &data);
 	srand((UINT)time(0));
-	for (int i = 0; i < CREATE_LIST_FILE_NAME_SIZE; i++) {
+	for (int i = 0; i < CREATE_LIST_FILE_NAME_SIZE; i++)
+	{
 		filename += alphanum[rand() % (sizeof(alphanum) - 1)];
 	}
-	if (hFind != INVALID_HANDLE_VALUE) {
-		do {
+	if (hFind != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
 			std::string _tmp = std::string(data.cFileName);
-			if (_tmp == "." || _tmp == "..") continue;
+			if (_tmp == "." || _tmp == "..")
+				continue;
 			UINT64 nextSize = ((UINT64)body.fileSize) + _tmp.length();
 			if (nextSize > UINT32_MAX)
-			{ //Protect file size overflow
+			{ // Protect file size overflow
 				iResult = RESPONSE_SENDER_NO_CONTENTS;
 				header.status = STATUS_FAIL_SERVER_ERROR;
 				header.version = VERSION;
@@ -57,8 +61,9 @@ int Requests::ListFilesRequest::do_request()
 		} while (FindNextFileA(hFind, &data));
 		FindClose(hFind);
 	}
-	
-	if (fileData.size() == 0 || hFind != INVALID_HANDLE_VALUE) {
+
+	if (fileData.size() == 0)
+	{
 		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_NO_FILES;
 		header.version = VERSION;
@@ -82,7 +87,9 @@ int Requests::ListFilesRequest::do_request()
 	iResult = RESPONSE_SENDER_FULL_RESPONSE;
 end:
 	Responses::sendResponse(_soc, &header, &body, iResult);
-	if(body.payload!= nullptr) delete[] body.payload;
-	if (header.filename != nullptr) delete[] header.filename;
+	if (body.payload != nullptr)
+		delete[] body.payload;
+	if (header.filename != nullptr)
+		delete[] header.filename;
 	return iResult;
 }

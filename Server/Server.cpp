@@ -79,7 +79,7 @@ void Server::workerCleaner()
 			}
 			else if (worker->getStartTime() < time(0) + TIMEOUT)
 			{
-				worker->abort();
+				// worker->abort();
 			}
 			lock.lock();
 			if (std::next(it_workers) != _workers.end())

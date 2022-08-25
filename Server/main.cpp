@@ -4,16 +4,15 @@
 #include "Server.h"
 #include "ConnectionWorker.h"
 
-
 int main()
 {
 	std::cout << "Hello World!\n";
 	Server server;
 	server.init();
-	do {
+	do
+	{
 		SOCKET sock;
 		server.nextSocket(&sock);
 		server.intiateWorker(sock);
 	} while (true);
 }
-

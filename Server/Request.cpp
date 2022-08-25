@@ -2,6 +2,7 @@
 
 Requests::Request::Request(const Request &old_obj)
 {
+	_postion = 0;
 	memcpy(&_header, &(old_obj._header), sizeof(RequestHeader));
 	_header.filename = new char[old_obj._header.fileLen];
 	memcpy(_header.filename, old_obj._header.filename, old_obj._header.fileLen);
@@ -10,11 +11,13 @@ Requests::Request::Request(const Request &old_obj)
 
 Requests::Request::Request(char *buffer, size_t buffsize)
 {
+	_postion = 0;
 	parseRequest(buffer, buffsize, this, REQUEST_PARSER_PARSE_HEADER | REQUEST_PARSER_PARSE_PAYLOAD_SIZE);
 }
 
 Requests::Request::Request()
 {
+	_postion = 0;
 }
 
 Requests::Request &Requests::Request::operator=(const Request &other)
@@ -27,6 +30,7 @@ Requests::Request &Requests::Request::operator=(const Request &other)
 	this->_header.filename = new char[other._header.fileLen];
 	memcpy(this->_header.filename, other._header.filename, other._header.fileLen);
 	memcpy(&(this->_body), &other._body, sizeof(RequestBody));
+	_postion = 0;
 	return *this;
 }
 
@@ -47,7 +51,14 @@ int Requests::Request::setFileName(const char *buffer, UINT len)
 
 int Requests::Request::setPayloadSize(const char *buffer, UINT len)
 {
-	return parseRequestPayloadSize(buffer, len, this);
+	int result = parseRequestPayloadSize(buffer, len, this);
+	if (result >= 0)
+	{
+		_body.payload = new byte[_body.fileSize];
+		ZeroMemory(_body.payload, _body.fileSize);
+		_postion = 0;
+	}
+	return result;
 }
 
 const Requests::RequestHeader &Requests::Request::getHeader()
@@ -122,7 +133,9 @@ int Requests::Request::parseRequestFileLen(const char *buffer, UINT len, Request
 		return -1;
 	}
 	memcpy(&(request->_header.fileLen), buffer, payloadSize);
+#ifdef BIG_ENDIAN
 	request->_header.fileLen = _byteswap_ushort(request->_header.fileLen);
+#endif // BIG_ENDIAN
 	return 0;
 }
 int Requests::Request::parseRequestCommand(const char *buffer, UINT len, Request *request)
@@ -133,7 +146,10 @@ int Requests::Request::parseRequestCommand(const char *buffer, UINT len, Request
 		return -1;
 	}
 	memcpy(&request->_header, buffer, payloadSize);
+
+#ifdef BIG_ENDIAN
 	request->_header.uid = _byteswap_ulong(request->_header.uid);
+#endif // BIG_ENDIAN
 	return 0;
 }
 int Requests::Request::parseRequestFileName(const char *buffer, UINT len, Request *request)
@@ -143,9 +159,9 @@ int Requests::Request::parseRequestFileName(const char *buffer, UINT len, Reques
 	{
 		return -1;
 	}
-	request->_header.filename = new char[fileNameSize+1];
+	request->_header.filename = new char[fileNameSize];
 	memcpy(request->_header.filename, buffer, fileNameSize);
-	request->_header.filename[fileNameSize] = 0;
+	request->_header.filename[fileNameSize - 1] = 0;
 	return 0;
 }
 int Requests::Request::parseRequestPayloadSize(const char *buffer, UINT len, Request *request)
@@ -156,7 +172,9 @@ int Requests::Request::parseRequestPayloadSize(const char *buffer, UINT len, Req
 		return -1;
 	}
 	memcpy(&(request->_body.fileSize), buffer, fileSizeDataSize);
+#ifdef BIG_ENDIAN
 	request->_body.fileSize = _byteswap_ulong(request->_body.fileSize);
+#endif // BIG_ENDIAN
 	return 0;
 }
 int Requests::Request::parseRequestPayload(const char *buffer, UINT len, Request *request)

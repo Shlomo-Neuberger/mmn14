@@ -1,55 +1,104 @@
 #include "Response.h"
 
-int Responses::sendResponse(const SOCKET soc,const PResponseHeader header, const PResponseBody body,int flag)
+int Responses::sendResponse(const SOCKET soc, const PResponseHeader header, const PResponseBody body, int flag)
 {
 	size_t sent = 0;
 	size_t bufSize = sizeof(header->version);
-	char* buffer = new char[bufSize];
-	memcpy(buffer,&(header->version),bufSize);
-	sent += send(soc, buffer, bufSize, 0);
-	delete[] buffer;
+	char *base = (char *)&(header->version);
+	char *buffer;
+	std::vector<char> main_buffer;
+
+	for (size_t i = 0; i < bufSize; i++)
+	{
+		main_buffer.push_back(*(base + i));
+	}
 
 	{
 		bufSize = sizeof(header->status);
-		buffer = new char[bufSize];
+
+#ifdef BIG_ENDIAN
 		UINT16 new_val = _byteswap_ushort(header->status);
-		memcpy(buffer, &new_val, bufSize);
-		sent += send(soc, buffer, bufSize, 0);
-		delete[] buffer;
+#else
+		UINT16 new_val = header->status;
+#endif // BIG_ENDIAN
+		base = (char *)&(new_val);
+		for (size_t i = 0; i < bufSize; i++)
+		{
+			main_buffer.push_back(*(base + i));
+		}
 	}
-	if (flag == RESPONSE_SENDER_NO_CONTENTS) {
+	if (flag == RESPONSE_SENDER_NO_CONTENTS)
+	{
+		buffer = new char[main_buffer.size()];
+		size_t i = 0;
+		for (char b : main_buffer)
+		{
+			buffer[i++] = b;
+		}
+		sent = send(soc, buffer, main_buffer.size(), NULL);
+		delete[] buffer;
 		return sent;
 	}
 	{
 		bufSize = sizeof(header->fileLen);
-		buffer = new char[bufSize];
+
+#ifdef BIG_ENDIAN
 		UINT16 new_val = _byteswap_ushort(header->fileLen);
-		memcpy(buffer, &(new_val), bufSize);
-		sent += send(soc, buffer, bufSize, 0);
-		delete[] buffer;
+#else
+		UINT16 new_val = header->fileLen;
+#endif // BIG_ENDIAN
+		base = (char *)&(new_val);
+		for (size_t i = 0; i < bufSize; i++)
+		{
+			main_buffer.push_back(*(base + i));
+		}
 	}
 
 	bufSize = header->fileLen;
-	buffer = new char[bufSize];
-	memcpy(buffer, header->filename, bufSize);
-	sent += send(soc, buffer, bufSize, 0);
-	delete[] buffer;
-	if (flag == RESPONSE_SENDER_NO_PAYLOAD) {
+	base = header->filename;
+	for (size_t i = 0; i < bufSize; i++)
+	{
+		main_buffer.push_back(*(base + i));
+	}
+	if (flag == RESPONSE_SENDER_NO_PAYLOAD)
+	{
+		buffer = new char[main_buffer.size()];
+		size_t i = 0;
+		for (char b : main_buffer)
+		{
+			buffer[i++] = b;
+		}
+		sent = send(soc, buffer, main_buffer.size(), NULL);
+		delete[] buffer;
 		return sent;
 	}
 	{
 		bufSize = sizeof(body->fileSize);
-		buffer = new char[bufSize];
+
+#ifdef BIG_ENDIAN
 		UINT32 new_val = _byteswap_ulong(body->fileSize);
-		memcpy(buffer, &(new_val), bufSize);
-		sent += send(soc, buffer, bufSize, 0);
-		delete[] buffer;
+#else
+		UINT32 new_val = body->fileSize;
+#endif // BIG_ENDIAN
+		base = (char *)&(new_val);
+		for (size_t i = 0; i < bufSize; i++)
+		{
+			main_buffer.push_back(*(base + i));
+		}
 	}
 	bufSize = body->fileSize;
-	buffer = new char[bufSize];
-	memcpy(buffer, body->payload, bufSize);
-	sent += send(soc, buffer, bufSize, 0);
+	base = (char *)body->payload;
+	for (size_t i = 0; i < bufSize; i++)
+	{
+		main_buffer.push_back(*(base + i));
+	}
+	buffer = new char[main_buffer.size()];
+	size_t i = 0;
+	for (char b : main_buffer)
+	{
+		buffer[i++] = b;
+	}
+	sent = send(soc, buffer, main_buffer.size(), NULL);
 	delete[] buffer;
-
 	return sent;
 }

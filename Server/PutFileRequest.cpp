@@ -28,7 +28,8 @@ int Requests::PutFileRequest::do_request()
 	recived = recv(_soc, buffer, _req->_header.fileLen, 0);
 	iResult = _req->setFileName(buffer, recived);
 	delete[] buffer;
-	if (iResult < 0) {
+	if (iResult < 0)
+	{
 		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
@@ -41,7 +42,8 @@ int Requests::PutFileRequest::do_request()
 	recived = recv(_soc, buffer, fileSizeMemberSize, 0);
 	iResult = _req->setPayloadSize(buffer, recived);
 	delete[] buffer;
-	if (iResult < 0) {
+	if (iResult < 0)
+	{
 		iResult = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
@@ -72,12 +74,17 @@ int Requests::PutFileRequest::do_request()
 		goto end;
 	}
 	buffer = new char[buffer_size + 1];
+
+	body.payload = new byte[buffer_size + 1];
 	do
 	{
 		recived = recv(_soc, buffer, buffer_size, 0);
 		fileSize -= recived;
+		memcpy(body.payload, buffer, buffer_size);
 		outfile.write(buffer, buffer_size);
+
 	} while (fileSize > 0);
+
 	outfile.close();
 	delete[] buffer;
 	iResult = RESPONSE_SENDER_FULL_RESPONSE;
@@ -86,8 +93,7 @@ int Requests::PutFileRequest::do_request()
 	header.fileLen = _req->getHeader().fileLen;
 	header.filename = _req->getHeader().filename;
 	body.fileSize = _req->getBody().fileSize;
-	body.payload = _req->getBody().payload;
-end:	
+end:
 	Responses::sendResponse(_soc, &header, &body, iResult);
 	return iResult;
 }

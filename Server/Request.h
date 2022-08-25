@@ -40,6 +40,7 @@ namespace Requests
 		RequestHeader _header;
 		// body of the request
 		RequestBody _body;
+		UINT _postion = 0;
 		// Constracturs
 		/*
 		 * Notice payload won't be deep copy by desing
@@ -100,6 +101,7 @@ namespace Requests
 		 * @return int non-negtive for OK
 		 */
 		int setPayloadSize(const char *buffer, UINT len);
+
 		/**
 		 * @brief Get the Header object
 		 *
