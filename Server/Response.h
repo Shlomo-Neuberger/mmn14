@@ -25,6 +25,6 @@ namespace Responses
 	 * @param flag what to send flag
 	 * @return int non negative OK
 	 */
-	int sendResponse(const SOCKET soc, const PResponseHeader header, const PResponseBody body, int flag = RESPONSE_SENDER_NO_CONTENTS);
+	size_t sendResponse(const SOCKET soc, const PResponseHeader header, const PResponseBody body, int flag = RESPONSE_SENDER_NO_CONTENTS);
 
 }

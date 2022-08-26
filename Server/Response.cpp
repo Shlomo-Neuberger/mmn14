@@ -1,6 +1,6 @@
 #include "Response.h"
 
-int Responses::sendResponse(const SOCKET soc, const PResponseHeader header, const PResponseBody body, int flag)
+size_t Responses::sendResponse(const SOCKET soc, const PResponseHeader header, const PResponseBody body, int flag)
 {
 	size_t sent = 0;
 	size_t bufSize = sizeof(header->version);
@@ -35,7 +35,7 @@ int Responses::sendResponse(const SOCKET soc, const PResponseHeader header, cons
 		{
 			buffer[i++] = b;
 		}
-		sent = send(soc, buffer, main_buffer.size(), NULL);
+		sent = send(soc, buffer, (int)main_buffer.size(), NULL);
 		delete[] buffer;
 		return sent;
 	}
@@ -68,7 +68,7 @@ int Responses::sendResponse(const SOCKET soc, const PResponseHeader header, cons
 		{
 			buffer[i++] = b;
 		}
-		sent = send(soc, buffer, main_buffer.size(), NULL);
+		sent = send(soc, buffer, (int)main_buffer.size(), NULL);
 		delete[] buffer;
 		return sent;
 	}
@@ -98,7 +98,7 @@ int Responses::sendResponse(const SOCKET soc, const PResponseHeader header, cons
 	{
 		buffer[i++] = b;
 	}
-	sent = send(soc, buffer, main_buffer.size(), NULL);
+	sent = send(soc, buffer, (int)main_buffer.size(), NULL);
 	delete[] buffer;
 	return sent;
 }

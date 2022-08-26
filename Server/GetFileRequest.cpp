@@ -16,7 +16,8 @@ int Requests::GetFileRequest::do_request()
 	Responses::ResponseBody body;
 	std::filebuf* pbuf = nullptr;
 	UINT64 fileSize = 0;
-	int iResult = 0;
+	size_t iResult = 0;
+	int retVal = -1;
 	char* fileData = nullptr;
 	char* buffer = new char[sizeof(_req->_header.fileLen)];
 	size_t recived = recv(_soc, buffer, sizeof(_req->_header.fileLen), 0);
@@ -38,7 +39,7 @@ int Requests::GetFileRequest::do_request()
 	std::ifstream ifile(lsPath,std::ios::binary);
 	if (!ifile.is_open())
 	{
-		iResult = RESPONSE_SENDER_NO_PAYLOAD;
+		retVal = RESPONSE_SENDER_NO_PAYLOAD;
 		header.status = STATUS_FAIL_FILE_NOT_FOUND;
 		header.version = VERSION;
 		header.fileLen = _req->getHeader().fileLen;
@@ -53,7 +54,7 @@ int Requests::GetFileRequest::do_request()
 	fileSize = pbuf->pubseekoff(0, ifile.end, ifile.in);
 	pbuf->pubseekpos(0, ifile.in);
 	if (fileSize > UINT32_MAX) {
-		iResult = RESPONSE_SENDER_NO_CONTENTS;
+		retVal = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
@@ -65,7 +66,7 @@ int Requests::GetFileRequest::do_request()
 	pbuf->sgetn(fileData, fileSize);
 
 	ifile.close();
-	iResult = RESPONSE_SENDER_FULL_RESPONSE;
+	retVal = RESPONSE_SENDER_FULL_RESPONSE;
 	header.version = VERSION;
 	header.status = STATUS_SEUCCESS_LIST_CREATED;
 	header.fileLen = _req->getHeader().fileLen;
@@ -74,9 +75,9 @@ int Requests::GetFileRequest::do_request()
 	body.fileSize = (UINT32)fileSize;
 	body.payload = (byte*)fileData;
 end:
-	Responses::sendResponse(_soc, &header, &body, iResult);
+	Responses::sendResponse(_soc, &header, &body, retVal);
 	if(nullptr != body.payload)delete[] body.payload;
 	if (nullptr != header.filename) delete[] header.filename;
-	return iResult;
+	return retVal;
 
 }

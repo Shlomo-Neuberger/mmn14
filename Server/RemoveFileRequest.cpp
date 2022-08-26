@@ -8,7 +8,8 @@ Requests::RemoveFileRequest::RemoveFileRequest(const Request &request, SOCKET so
 
 int Requests::RemoveFileRequest::do_request()
 {
-	int iResult = 0;
+	size_t iResult = 0;
+	int RetVal = 0;
 
 	Responses::ResponseHeader header;
 	Responses::ResponseBody body;
@@ -16,11 +17,11 @@ int Requests::RemoveFileRequest::do_request()
 	// get the filename size
 	char *buffer = new char[sizeof(_req->_header.fileLen)];
 	ZeroMemory(buffer, sizeof(_req->_header.fileLen));
-	size_t recived = recv(_soc, buffer, sizeof(_req->_header.fileLen), 0);
+	size_t recived = (size_t)recv(_soc, buffer, sizeof(_req->_header.fileLen), 0);
 	iResult = _req->setFileLen(buffer, recived);
 	delete[] buffer;
 	if (iResult < 0) {
-		iResult = RESPONSE_SENDER_NO_CONTENTS;
+		RetVal = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
@@ -32,7 +33,7 @@ int Requests::RemoveFileRequest::do_request()
 	iResult = _req->setFileName(buffer, recived);
 	delete[] buffer;
 	if (iResult < 0) {
-		iResult = RESPONSE_SENDER_NO_CONTENTS;
+		RetVal = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
@@ -43,7 +44,7 @@ int Requests::RemoveFileRequest::do_request()
 	outfile.open(filePath, std::ios::binary | std::ios::trunc | std::ios::in);
 	if (!outfile.is_open())
 	{
-		iResult = RESPONSE_SENDER_NO_CONTENTS;
+		RetVal = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_FILE_NOT_FOUND;
 		header.version = VERSION;
 		goto end;
@@ -51,17 +52,17 @@ int Requests::RemoveFileRequest::do_request()
 	outfile.close();
 	iResult = remove(filePath.c_str());
 	if (iResult < 0) {
-		iResult = RESPONSE_SENDER_NO_CONTENTS;
+		RetVal = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
 	}
-	iResult = RESPONSE_SENDER_NO_PAYLOAD;
+	RetVal = RESPONSE_SENDER_NO_PAYLOAD;
 	header.status = STATUS_SEUCCESS_FOUND_FILE;
 	header.version = VERSION;
 	header.fileLen = _req->getHeader().fileLen;
 	header.filename = _req->getHeader().filename;
  end:
-	Responses::sendResponse(_soc, &header, &body, iResult);
-	return RESPONSE_SENDER_NO_PAYLOAD == iResult ? 0 : iResult; // A correct return value is NO_PAYLOAD so we rturn 0
+	Responses::sendResponse(_soc, &header, &body, RetVal);
+	return RESPONSE_SENDER_NO_PAYLOAD == RetVal ? 0 : RetVal; // A correct return value is NO_PAYLOAD so we rturn 0
 }

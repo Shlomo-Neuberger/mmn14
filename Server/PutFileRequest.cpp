@@ -9,17 +9,18 @@ Requests::PutFileRequest::PutFileRequest(const Request &request, SOCKET soc)
 int Requests::PutFileRequest::do_request()
 {
 	std::ofstream outfile;
-	int iResult = 0;
-	size_t buffer_size;
+	size_t iResult = 0;
+	int buffer_size;
 	std::string basepath;
 	std::string filePath;
 	size_t fileSize;
-	size_t fileSizeMemberSize;
+	int fileSizeMemberSize;
+	int retVal = -1;
 	Responses::ResponseHeader header;
 	Responses::ResponseBody body;
 	// get the filename size
 	char *buffer = new char[sizeof(_req->_header.fileLen)];
-	size_t recived = recv(_soc, buffer, sizeof(_req->_header.fileLen), 0);
+	int recived = recv(_soc, buffer, sizeof(_req->_header.fileLen), 0);
 	iResult = _req->setFileLen(buffer, recived);
 	delete[] buffer;
 
@@ -30,7 +31,7 @@ int Requests::PutFileRequest::do_request()
 	delete[] buffer;
 	if (iResult < 0)
 	{
-		iResult = RESPONSE_SENDER_NO_CONTENTS;
+		retVal = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
@@ -44,7 +45,7 @@ int Requests::PutFileRequest::do_request()
 	delete[] buffer;
 	if (iResult < 0)
 	{
-		iResult = RESPONSE_SENDER_NO_CONTENTS;
+		retVal = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
@@ -58,7 +59,7 @@ int Requests::PutFileRequest::do_request()
 	filePath = basepath + "\\" + _req->_header.filename;
 	if (mkdirRecurse(basepath) != 0)
 	{
-		iResult = RESPONSE_SENDER_NO_CONTENTS;
+		retVal = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
@@ -68,7 +69,7 @@ int Requests::PutFileRequest::do_request()
 	outfile.open(filePath, std::ios::binary | std::ios::app | std::ios::out);
 	if (!outfile.is_open())
 	{
-		iResult = RESPONSE_SENDER_NO_CONTENTS;
+		retVal = RESPONSE_SENDER_NO_CONTENTS;
 		header.status = STATUS_FAIL_SERVER_ERROR;
 		header.version = VERSION;
 		goto end;
@@ -87,13 +88,13 @@ int Requests::PutFileRequest::do_request()
 
 	outfile.close();
 	delete[] buffer;
-	iResult = RESPONSE_SENDER_FULL_RESPONSE;
+	retVal = RESPONSE_SENDER_FULL_RESPONSE;
 	header.status = STATUS_SEUCCESS_FOUND_FILE;
 	header.version = VERSION;
 	header.fileLen = _req->getHeader().fileLen;
 	header.filename = _req->getHeader().filename;
 	body.fileSize = _req->getBody().fileSize;
 end:
-	Responses::sendResponse(_soc, &header, &body, iResult);
-	return iResult;
+	Responses::sendResponse(_soc, &header, &body, retVal);
+	return retVal;
 }

@@ -56,7 +56,7 @@ int Requests::ListFilesRequest::do_request()
 				header.version = VERSION;
 				goto end;
 			}
-			body.fileSize += _tmp.length();
+			body.fileSize += (UINT32)_tmp.length();
 			fileData.push_back(_tmp);
 		} while (FindNextFileA(hFind, &data));
 		FindClose(hFind);
@@ -75,7 +75,7 @@ int Requests::ListFilesRequest::do_request()
 	header.fileLen = CREATE_LIST_FILE_NAME_SIZE;
 	header.filename = new char[header.fileLen];
 	memcpy(header.filename, filename.c_str(), CREATE_LIST_FILE_NAME_SIZE);
-	body.fileSize += fileData.size();
+	body.fileSize += (UINT32)fileData.size();
 	body.payload = new byte[body.fileSize];
 	skips = 0;
 	for (auto tmpFilename : fileData)

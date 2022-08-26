@@ -27,12 +27,12 @@ namespace Requests
 	class Request
 	{
 	private:
-		int parseRequest(const char *buffer, UINT len, Request *request, byte flags = REQUEST_PARSER_PARSE_ALL);
-		int parseRequestCommand(const char *buffer, UINT len, Request *request);
-		int parseRequestFileLen(const char *buffer, UINT len, Request *request);
-		int parseRequestFileName(const char *buffer, UINT len, Request *request);
-		int parseRequestPayloadSize(const char *buffer, UINT len, Request *request);
-		int parseRequestPayload(const char *buffer, UINT len, Request *request);
+		int parseRequest(const char *buffer, size_t len, Request *request, byte flags = REQUEST_PARSER_PARSE_ALL);
+		int parseRequestCommand(const char *buffer, size_t len, Request *request);
+		int parseRequestFileLen(const char *buffer, size_t len, Request *request);
+		int parseRequestFileName(const char *buffer, size_t len, Request *request);
+		int parseRequestPayloadSize(const char *buffer, size_t len, Request *request);
+		int parseRequestPayload(const char *buffer, size_t len, Request *request);
 
 	public:
 		// Members
@@ -77,14 +77,14 @@ namespace Requests
 		 * @param len buffer size
 		 * @return int non-negtive for OK
 		 */
-		int setCommonHeader(const char *buffer, UINT len);
+		int setCommonHeader(const char *buffer, size_t len);
 		/**
 		 * @brief Set the File Len object
 		 * @param buffer source
 		 * @param len buffer size
 		 * @return int non-negtive for OK
 		 */
-		int setFileLen(const char *buffer, UINT len);
+		size_t setFileLen(const char *buffer, size_t len);
 		/**
 		 * @brief Set the File Name object
 		 *
@@ -92,7 +92,7 @@ namespace Requests
 		 * @param len buffer size
 		 * @return int non-negtive for OK
 		 */
-		int setFileName(const char *buffer, UINT len);
+		int setFileName(const char *buffer, size_t len);
 		/**
 		 * @brief Set the Payload Size object
 		 *
@@ -100,7 +100,7 @@ namespace Requests
 		 * @param len buffer size
 		 * @return int non-negtive for OK
 		 */
-		int setPayloadSize(const char *buffer, UINT len);
+		int setPayloadSize(const char *buffer, size_t len);
 
 		/**
 		 * @brief Get the Header object
