@@ -82,7 +82,7 @@ int Requests::ListFilesRequest::do_request()
 	{
 		memcpy(body.payload + skips, tmpFilename.c_str(), tmpFilename.length() + 1);
 		skips += tmpFilename.length();
-		body.payload[skips] = (byte)'\n';
+		body.payload[skips++] = (byte)'\n';
 	}
 	iResult = RESPONSE_SENDER_FULL_RESPONSE;
 end:

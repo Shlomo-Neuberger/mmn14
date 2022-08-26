@@ -75,7 +75,7 @@ int Requests::PutFileRequest::do_request()
 	}
 	buffer = new char[buffer_size + 1];
 
-	body.payload = new byte[buffer_size + 1];
+	body.payload = new byte[fileSize];
 	do
 	{
 		recived = recv(_soc, buffer, buffer_size, 0);
