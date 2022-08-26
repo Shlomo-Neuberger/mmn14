@@ -1,9 +1,13 @@
 # Maman 14
 We were task to create a backup server which stores a file for each user, and a client that can send the file to the server
 ## Server side
-<b>Compiled with</b>
+<hr>
+Compiled with:
 <li>Windows 11</li>
-<li>Windows 11</li>
+<li>Build tool v143</li>
+<li>Warning set to lvl-4</li>
+<li>Treat warning as error set to true</li>
+<hr>
 I used for server side the Winsock32 api provided by Windows Win32api.<br>
 So the it runs only on windows.<br>
 One of the biggesr problam I had is wthere recive the data in `Big endian` or `Small endian`, so ichoosed to handle both in the code and export the server config in the `Common.h`.<br>
