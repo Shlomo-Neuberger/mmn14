@@ -1,15 +1,16 @@
-import selectors
 import socket
 from random import random
 from enum import IntEnum
 from typing import Optional, Union
-from pprint import pprint
 
 VERSION = 0  # Version number of the protocol
 SEND_BIG = True  # if to send int in big endian
 
 
 class RequestType(IntEnum):
+    """
+        Enum that represents all the requests
+    """
     GET = 200
     PUT = 100
     DELETE = 201
@@ -17,6 +18,9 @@ class RequestType(IntEnum):
 
 
 class ResponseType(IntEnum):
+    """
+        Enum that represents all the responses
+    """
     OK = 210
     OK_LIST = 211
     ERROR_FILE_NOT_EXSISTS = 1001
@@ -25,6 +29,10 @@ class ResponseType(IntEnum):
 
 
 class Request:
+    """
+        Class that wraps all the needed information and methods for requests
+    """
+
     def __init__(self, req_type: RequestType, file_name: Optional[str] = None, uid: Optional[Union[str, int]] = None) -> None:
         self.op = req_type
         self.version = VERSION
@@ -39,6 +47,9 @@ class Request:
             raise Exception(f"For {req_type} you must pass file")
 
     def __read_file(self):
+        """
+        Opens the file to be uploaded and save it to the payload buffer
+        """
         mybytearray = bytearray()
         with open(self.file_name, "rb") as fp:
             b = fp.read(1)
@@ -49,6 +60,9 @@ class Request:
         return mybytearray
 
     def to_buffer(self):
+        """
+        Serilaize the request to bytearray
+        """
         bytes_array = bytearray()
         bytes_array += self.uid.to_bytes(4, 'big' if SEND_BIG else 'little')
         bytes_array += self.version.to_bytes(1,
@@ -67,6 +81,9 @@ class Request:
 
 
 class Response:
+    """
+        Class that wraps all the needed information and methods for response
+    """
     # DEFINES CONSTANTS
     SIZE_OF_VERSION = 1
     SIZE_OF_STATUS = 2
@@ -88,6 +105,9 @@ class Response:
         self.payload = payload
 
     def from_bytes(self, src: bytes):
+        """
+        Fill the information of respinse from bytearray
+        """
         if len(src) < 1:
             raise Exception("No bytes to parse")
 
@@ -100,7 +120,8 @@ class Response:
 
         if len(src) < end:
             raise Exception("Malformed response")
-        self.status = int.from_bytes(src[start:end], "big")
+        self.status = int.from_bytes(
+            src[start:end], 'big' if SEND_BIG else 'little')
 
         if self.status in [ResponseType.ERROR_NO_FILE_ON_SERVER, ResponseType.ERROR_GENERAL]:
             return
@@ -109,7 +130,8 @@ class Response:
             end = start + Response.SIZE_OF_FILE_NAME
             if len(src) < end:
                 raise Exception("Malformed response")
-            self.name_len = int.from_bytes(src[start:end], "big")
+            self.name_len = int.from_bytes(
+                src[start:end], 'big' if SEND_BIG else 'little')
             start = end
             if len(src) < end:
                 raise Exception("Malformed response")
@@ -118,7 +140,8 @@ class Response:
         if self.status in [ResponseType.OK_LIST, ResponseType.OK]:
             start = end
             end = start + Response.SIZE_OF_PAYLOAD_SIZE
-            self.file_size = int.from_bytes(src[start:end], "big")
+            self.file_size = int.from_bytes(
+                src[start:end], 'big' if SEND_BIG else 'little')
             start = end
             end = start+self.file_size
             self.payload = src[start:end]
@@ -173,7 +196,11 @@ if __name__ == "__main__":
                 buff_ans) > 100 else buff_ans)
             res.from_bytes(buff_ans)
             print('formaatted response', res)
-            if _req == req4:
+            if _req.op == RequestType.GET:
                 with open('tmp', 'wb',) as out:
                     out.write(res.payload)
                 print("saved", res.name, "at", 'tmp')
+            if _req.op == RequestType.LIST:
+                with open(_req.file_name, 'wb',) as out:
+                    out.write(res.payload)
+                print("saved", res.name)
